@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan — 30 Dages Eventyr</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F6F3EC;--ink:#181714;--ink-l:#6B6760;--ink-m:#A8A49E;--white:#fff;--red:#C4402B;
+  --d1:#1E3A5F;--d1b:#E8EDF4;--d2:#B83A1A;--d2b:#FAE8E4;--d3:#1F5F5B;--d3b:#E4F4F3;
+  --d4:#7A4020;--d4b:#F5EAE3;--d5:#3A5F2A;--d5b:#E5F0E2;--d6:#2C4F7C;--d6b:#E6EDF6;
+  --cc:#8B5E14;--cf:#B83A1A;--cn:#3A6630;--cs:#5C3A8B;--ct:#1A4E8B;--ca:#8B1A6B;--ce:#C47820;--cz:#7A7670;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* HERO */
+.hero{position:relative;background:var(--ink);color:#fff;padding:68px 48px 52px;overflow:hidden}
+.hero-dots{position:absolute;inset:0;opacity:.055;background-image:radial-gradient(circle,#fff 1px,transparent 1px),radial-gradient(circle,#fff 1px,transparent 1px);background-size:32px 32px;background-position:0 0,16px 16px}
+.hero-k{position:absolute;right:56px;top:50%;transform:translateY(-50%);font-family:'Cormorant Garamond',serif;font-size:152px;font-weight:300;opacity:.055;line-height:1;user-select:none}
+.hero-eye{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:14px;font-weight:500}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(46px,5.5vw,72px);font-weight:300;line-height:1.05;letter-spacing:-1px;margin-bottom:5px}
+.hero-title em{font-style:italic;color:rgba(255,255,255,.38)}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:32px;font-weight:300;letter-spacing:.02em}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap;align-items:center}
+.hs{display:flex;flex-direction:column;gap:2px}
+.hs-n{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1}
+.hs-l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.32)}
+.hs-sep{width:1px;background:rgba(255,255,255,.1);align-self:stretch;margin:4px 0}
+
+/* VIEW TOGGLE */
+.view-bar{display:flex;background:var(--white);border-bottom:1px solid rgba(0,0,0,.07);padding:0 48px}
+.vbtn{height:48px;padding:0 22px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;cursor:pointer;background:none;border:none;color:var(--ink-m);border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:7px}
+.vbtn:hover{color:var(--ink)}.vbtn.active{color:var(--ink);border-bottom-color:var(--ink)}
+.vbtn svg{width:14px;height:14px;flex-shrink:0}
+
+/* DEST TABS */
+.dtabs{display:flex;background:var(--paper);border-bottom:1px solid rgba(0,0,0,.06);overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100}
+.dtabs::-webkit-scrollbar{display:none}
+.dtab{flex-shrink:0;padding:0 18px;height:44px;display:flex;align-items:center;gap:6px;cursor:pointer;border:none;border-bottom:2px solid transparent;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-m);transition:all .15s;white-space:nowrap;background:transparent;font-family:'DM Sans',sans-serif}
+.dtab:hover{color:var(--ink)}.dtab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.dd{width:7px;height:7px;border-radius:50%;opacity:.45;transition:opacity .15s}.dtab.active .dd{opacity:1}
+[data-dest="all"] .dd{background:var(--ink)}[data-dest="tokyo1"] .dd{background:var(--d1)}[data-dest="osaka"] .dd{background:var(--d2)}
+[data-dest="hiro"] .dd{background:var(--d3)}[data-dest="nagoya"] .dd{background:var(--d4)}[data-dest="kana"] .dd{background:var(--d5)}[data-dest="tokyo2"] .dd{background:var(--d6)}
+
+/* CAT BAR */
+.cbar{padding:12px 48px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--paper);border-bottom:1px solid rgba(0,0,0,.05)}
+.cbar-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);margin-right:4px}
+.cpill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.1);background:var(--white);color:var(--ink-l);transition:all .13s;font-family:'DM Sans',sans-serif}
+.cpill:hover{border-color:rgba(0,0,0,.2);color:var(--ink)}.cpill.active{border-color:transparent;color:#fff}
+.cpill[data-cat="all"].active{background:var(--ink)}.cpill[data-cat="culture"].active{background:var(--cc)}
+.cpill[data-cat="food"].active{background:var(--cf)}.cpill[data-cat="nature"].active{background:var(--cn)}
+.cpill[data-cat="shopping"].active{background:var(--cs)}.cpill[data-cat="transport"].active{background:var(--ct)}
+.cpill[data-cat="art"].active{background:var(--ca)}.cpill[data-cat="entertainment"].active{background:var(--ce)}
+.cpill[data-cat="free"].active{background:var(--cz)}
+.cdot{width:6px;height:6px;border-radius:50%}
+
+/* TIMELINE */
+#tv{display:block}
+.tlm{max-width:900px;margin:0 auto;padding:32px 48px 120px}
+.dsec{margin-bottom:40px}
+.dh{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.07)}
+.dh-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:-.2px}
+.dh-days{font-size:11px;color:var(--ink-m);letter-spacing:.05em}
+.dh-bar{flex:1;height:1px;background:linear-gradient(to right,rgba(0,0,0,.09),transparent)}
+.dgrid{display:grid;gap:9px}
+.dcard{background:var(--white);border-radius:9px;border:1px solid rgba(0,0,0,.07);overflow:hidden;display:flex;transition:border-color .15s,transform .15s,box-shadow .15s;animation:fadeUp .32s ease both}
+.dcard:hover{border-color:rgba(0,0,0,.13);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.dcard.hidden{display:none}
+.dstripe{width:4px;flex-shrink:0}
+.dest-tokyo1 .dstripe{background:var(--d1)}.dest-osaka .dstripe{background:var(--d2)}.dest-hiro .dstripe{background:var(--d3)}
+.dest-nagoya .dstripe{background:var(--d4)}.dest-kana .dstripe{background:var(--d5)}.dest-tokyo2 .dstripe{background:var(--d6)}
+.dinner{flex:1;padding:14px 17px;display:flex;gap:16px}
+.dnc{flex-shrink:0;width:44px;text-align:center}
+.dn{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1}
+.dl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);margin-top:1px}
+.ddiv{width:1px;background:rgba(0,0,0,.06);align-self:stretch;flex-shrink:0}
+.dbody{flex:1;min-width:0}
+.dtrow{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.dtitle{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;letter-spacing:-.1px}
+.bshink{display:inline-flex;align-items:center;background:var(--d1);color:#fff;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:100px;font-weight:500}
+.bfree{display:inline-flex;align-items:center;background:#EDE9E1;color:var(--ink-m);font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:100px;font-weight:500}
+.acts{display:flex;flex-direction:column;gap:4px}
+.act{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink)}
+.act.fa{color:var(--ink-m);font-style:italic}
+.adot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ac{background:var(--cc)}.af{background:var(--cf)}.an{background:var(--cn)}.as{background:var(--cs)}
+.at{background:var(--ct)}.aa{background:var(--ca)}.ae{background:var(--ce)}.az{background:var(--cz)}
+.rcount{font-size:11px;color:var(--ink-m);margin-bottom:18px;letter-spacing:.04em}
+.empty{text-align:center;padding:72px 0;display:none}
+.empty.vis{display:block}
+.et{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--ink-m);margin-bottom:5px}
+.es{font-size:12px;color:var(--ink-m)}
+
+/* MAP */
+#mv{display:none;position:relative}
+#map{height:calc(100vh - 196px);min-height:480px;width:100%}
+.mk{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.28);cursor:pointer;font-family:'DM Sans',sans-serif;color:#fff;transition:transform .12s}
+.mk:hover{transform:scale(1.18)}
+.mk.dest-tokyo1{background:var(--d1)}.mk.dest-osaka{background:var(--d2)}.mk.dest-hiro{background:var(--d3)}
+.mk.dest-nagoya{background:var(--d4)}.mk.dest-kana{background:var(--d5)}.mk.dest-tokyo2{background:var(--d6)}
+
+/* SPOT PANEL */
+#sp{position:absolute;top:0;right:0;bottom:0;width:360px;background:var(--white);box-shadow:-6px 0 40px rgba(0,0,0,.13);z-index:1000;transform:translateX(105%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+#sp.open{transform:translateX(0)}
+.sp-photo{flex-shrink:0;height:224px;overflow:hidden;background:#E0DDD6;position:relative}
+.sp-photo img{width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+.sp-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);background:#E8E5DC}
+#sp-close{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.52);color:#fff;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;line-height:1;transition:background .12s;backdrop-filter:blur(6px)}
+#sp-close:hover{background:rgba(0,0,0,.78)}
+.sp-body{flex:1;overflow-y:auto;padding:18px}
+.sp-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.sbadge{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.sb-day{background:#EFECE6;color:var(--ink-l)}
+.sp-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;line-height:1.2;margin-bottom:10px;letter-spacing:-.2px}
+.sp-desc{font-size:12.5px;color:var(--ink-l);line-height:1.75}
+
+/* MAP LEGEND */
+.mleg{position:absolute;bottom:16px;left:10px;background:var(--white);border-radius:8px;padding:10px 13px;box-shadow:0 2px 14px rgba(0,0,0,.1);z-index:500;display:flex;flex-direction:column;gap:6px}
+.mli{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-l)}
+.mld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* BOTTOM LEGEND */
+.bleg{background:var(--white);border-top:1px solid rgba(0,0,0,.06);padding:12px 48px;display:flex;flex-wrap:wrap;gap:14px;position:fixed;bottom:0;left:0;right:0;z-index:50}
+.bli{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-l)}
+.bld{width:6px;height:6px;border-radius:50%}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.dcard:nth-child(1){animation-delay:.03s}.dcard:nth-child(2){animation-delay:.06s}.dcard:nth-child(3){animation-delay:.09s}
+.dcard:nth-child(4){animation-delay:.12s}.dcard:nth-child(5){animation-delay:.15s}.dcard:nth-child(6){animation-delay:.18s}
+
+@media(max-width:680px){
+  .hero{padding:40px 18px 32px}.hero-k{display:none}
+  .view-bar,.cbar{padding:0 14px}.cbar{padding:10px 14px}
+  .tlm{padding:20px 14px 120px}
+  .bleg{padding:10px 14px;gap:10px}
+  #sp{width:100%;top:auto;right:0;left:0;height:72vh;transform:translateY(105%)}
+  #sp.open{transform:translateY(0)}
+  #map{height:calc(100vh - 170px)}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-k">日本</div>
+  <p class="hero-eye">Sommer — Japan 2025</p>
+  <h1 class="hero-title">30 Dage i <em>Land of<br>the Rising Sun</em></h1>
+  <p class="hero-sub">Tokyo · Osaka · Hiroshima · Naoshima · Nagoya · Kanazawa</p>
+  <div class="hero-stats">
+    <div class="hs"><span class="hs-n">30</span><span class="hs-l">Dage</span></div>
+    <div class="hs-sep"></div>
+    <div class="hs"><span class="hs-n">6</span><span class="hs-l">Destinationer</span></div>
+    <div class="hs-sep"></div>
+    <div class="hs"><span class="hs-n">51</span><span class="hs-l">Steder</span></div>
+    <div class="hs-sep"></div>
+    <div class="hs"><span class="hs-n">6</span><span class="hs-l">Shinkansen</span></div>
+  </div>
+</header>
+
+<div class="view-bar">
+  <button class="vbtn active" id="btn-tl" onclick="setView('tl')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="6.5" width="14" height="3" rx="1"/><rect x="1" y="11" width="14" height="3" rx="1"/></svg>
+    Tidslinje
+  </button>
+  <button class="vbtn" id="btn-map" onclick="setView('map')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2C5.24 2 3 4.24 3 7c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5z"/><circle cx="8" cy="7" r="1.8"/></svg>
+    Interaktivt Kort
+  </button>
+</div>
+
+<nav class="dtabs" id="dtabs">
+  <button class="dtab active" data-dest="all"><span class="dd"></span>Alle</button>
+  <button class="dtab" data-dest="tokyo1"><span class="dd"></span>Tokyo I</button>
+  <button class="dtab" data-dest="osaka"><span class="dd"></span>Osaka</button>
+  <button class="dtab" data-dest="hiro"><span class="dd"></span>Hiroshima &amp; Naoshima</button>
+  <button class="dtab" data-dest="nagoya"><span class="dd"></span>Nagoya</button>
+  <button class="dtab" data-dest="kana"><span class="dd"></span>Kanazawa</button>
+  <button class="dtab" data-dest="tokyo2"><span class="dd"></span>Tokyo II</button>
+</nav>
+
+<div class="cbar">
+  <span class="cbar-lbl">Kategori:</span>
+  <button class="cpill active" data-cat="all">Alle</button>
+  <button class="cpill" data-cat="culture"><span class="cdot ac"></span>Kultur</button>
+  <button class="cpill" data-cat="food"><span class="cdot af"></span>Mad</button>
+  <button class="cpill" data-cat="nature"><span class="cdot an"></span>Natur</button>
+  <button class="cpill" data-cat="art"><span class="cdot aa"></span>Kunst</button>
+  <button class="cpill" data-cat="entertainment"><span class="cdot ae"></span>Oplevelser</button>
+  <button class="cpill" data-cat="shopping"><span class="cdot as"></span>Shopping</button>
+  <button class="cpill" data-cat="transport"><span class="cdot at"></span>Transport</button>
+  <button class="cpill" data-cat="free"><span class="cdot az"></span>Fri tid</button>
+</div>
+
+<!-- TIMELINE -->
+<div id="tv">
+  <div class="tlm">
+    <div id="rc" class="rcount"></div>
+    <div id="tl"></div>
+    <div id="emp" class="empty"><p class="et">Ingen resultater</p><p class="es">Prøv at ændre filtrene.</p></div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="mv">
+  <div id="map"></div>
+  <div id="sp">
+    <div class="sp-photo" id="sp-pw">
+      <div class="sp-loading" id="sp-ld">Indlæser foto...</div>
+      <img id="sp-img" src="" alt="" style="opacity:0"
+        onload="this.style.opacity=1;document.getElementById('sp-ld').style.display='none'"
+        onerror="this.closest('.sp-photo').style.background='#D8D4CC';this.remove()">
+    </div>
+    <button id="sp-close" onclick="closePanel()">&#215;</button>
+    <div class="sp-body">
+      <div class="sp-badges" id="sp-badges"></div>
+      <div class="sp-name" id="sp-name"></div>
+      <div class="sp-desc" id="sp-desc"></div>
+    </div>
+  </div>
+  <div class="mleg">
+    <div class="mli"><span class="mld" style="background:var(--d1)"></span>Tokyo I</div>
+    <div class="mli"><span class="mld" style="background:var(--d2)"></span>Osaka</div>
+    <div class="mli"><span class="mld" style="background:var(--d3)"></span>Hiroshima &amp; Naoshima</div>
+    <div class="mli"><span class="mld" style="background:var(--d4)"></span>Nagoya</div>
+    <div class="mli"><span class="mld" style="background:var(--d5)"></span>Kanazawa</div>
+    <div class="mli"><span class="mld" style="background:var(--d6)"></span>Tokyo II</div>
+  </div>
+</div>
+
+<footer class="bleg" id="bleg">
+  <div class="bli"><span class="bld ac"></span>Kultur</div>
+  <div class="bli"><span class="bld af"></span>Mad</div>
+  <div class="bli"><span class="bld an"></span>Natur</div>
+  <div class="bli"><span class="bld aa"></span>Kunst</div>
+  <div class="bli"><span class="bld ae"></span>Oplevelser</div>
+  <div class="bli"><span class="bld as"></span>Shopping</div>
+  <div class="bli"><span class="bld at"></span>Transport</div>
+  <div class="bli"><span class="bld az"></span>Fri tid</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const DL={tokyo1:"Tokyo — Del 1",osaka:"Osaka",hiro:"Hiroshima & Naoshima",nagoya:"Nagoya",kana:"Kanazawa",tokyo2:"Tokyo — Del 2"};
+const DO=["tokyo1","osaka","hiro","nagoya","kana","tokyo2"];
+const DD={tokyo1:"Dag 1–4",osaka:"Dag 5–12",hiro:"Dag 13–14",nagoya:"Dag 15–17",kana:"Dag 18–19",tokyo2:"Dag 20–30"};
+const DC={tokyo1:"#1E3A5F",osaka:"#B83A1A",hiro:"#1F5F5B",nagoya:"#7A4020",kana:"#3A5F2A",tokyo2:"#2C4F7C"};
+const CC={culture:"#8B5E14",food:"#B83A1A",nature:"#3A6630",shopping:"#5C3A8B",transport:"#1A4E8B",art:"#8B1A6B",entertainment:"#C47820",free:"#7A7670"};
+const CL={culture:"Kultur",food:"Mad",nature:"Natur",shopping:"Shopping",transport:"Transport",art:"Kunst",entertainment:"Oplevelser",free:"Fri tid"};
+
+const DAYS=[
+  {day:1,dest:"tokyo1",date:"Onsdag 1.",title:"Ankomst",shink:false,fd:false,acts:[
+    {n:"Ankomst — Haneda lufthavn",c:"transport"},{n:"Køb af snacks",c:"food"},
+    {n:"Lur på hotellet",c:"free",f:1},{n:"Urban exploring i nabolaget",c:"culture"},
+    {n:"Aftensmad",c:"food"},{n:"Onsen (valgfrit)",c:"free",f:1}]},
+  {day:2,dest:"tokyo1",date:"Torsdag 2.",title:"Cat Day",shink:false,fd:false,acts:[
+    {n:"Gotokuji Temple — kattefigurer",c:"culture"},{n:"Frokost på kattekafé",c:"food"},
+    {n:"Shimokitazawa — vintage & vinyl",c:"shopping"},{n:"Aftensmad",c:"food"}]},
+  {day:3,dest:"tokyo1",date:"Fredag 3.",title:"Avi & Jonathans Dag",shink:false,fd:false,acts:[
+    {n:"teamLab Planets",c:"art"},{n:"Omoide Yokocho (Piss Alley)",c:"food"},{n:"Golden Gai",c:"food"}]},
+  {day:4,dest:"tokyo1",date:"Lørdag 4.",title:"Kultur & Shopping",shink:false,fd:false,acts:[
+    {n:"Glitch Coffee",c:"food"},{n:"Kabuki-za Theatre",c:"culture"},
+    {n:"Uniqlo Ginza — flagskibsbutik",c:"shopping"},{n:"Hamarikyu Gardens + eftermiddagste",c:"nature"}]},
+  {day:5,dest:"osaka",date:"Søndag 5.",title:"Osaka Day 1",shink:true,sr:"Tokyo → Osaka",fd:false,acts:[
+    {n:"Shinkansen: Tokyo → Osaka",c:"transport"},{n:"Osaka Aquarium Kaiyukan",c:"entertainment"}]},
+  {day:6,dest:"osaka",date:"Mandag 6.",title:"Den Lange Gade",shink:false,fd:false,acts:[
+    {n:"Tenjinbashi-suji — Japans længste shoppinggade",c:"shopping"}]},
+  {day:7,dest:"osaka",date:"Tirsdag 7.",title:"Tanabata — Stjernefestivalen",shink:false,fd:false,acts:[
+    {n:"Tanabata-dekorationer & lanterner",c:"culture"},{n:"Shitennoji Tempel",c:"culture"}]},
+  {day:8,dest:"osaka",date:"Onsdag 8.",title:"Universal Studios Japan",shink:false,fd:false,acts:[
+    {n:"Super Nintendo World",c:"entertainment"},{n:"Harry Potter World",c:"entertainment"}]},
+  {day:9,dest:"osaka",date:"Torsdag 9.",title:"Dagstur til Kyoto",shink:false,fd:false,acts:[
+    {n:"Kiyomizu-dera",c:"culture"},{n:"Sannenzaka & Ninenzaka",c:"culture"},{n:"Gion — geisha-distriktet",c:"culture"}]},
+  {day:10,dest:"osaka",date:"Fredag 10.",title:"Mad-Exploring",shink:false,fd:false,acts:[
+    {n:"Kuromon Market",c:"food"},{n:"Fri mad-udforskning",c:"free",f:1}]},
+  {day:11,dest:"osaka",date:"Lørdag 11.",title:"Dagstur til Nara",shink:false,fd:false,acts:[
+    {n:"Nara Park — hjortene",c:"nature"},{n:"Todai-ji — den store Buddha",c:"culture"}]},
+  {day:12,dest:"osaka",date:"Søndag 12.",title:"Fushimi Inari",shink:false,fd:false,acts:[
+    {n:"Fushimi Inari — torii-porte",c:"culture"},{n:"Vandring op ad bjerget",c:"nature"},{n:"Street food ved foden",c:"food"}]},
+  {day:13,dest:"hiro",date:"Mandag 13.",title:"Nuclear Day",shink:true,sr:"Osaka → Hiroshima",fd:false,acts:[
+    {n:"Shinkansen: Osaka → Hiroshima",c:"transport"},{n:"Atomic Bomb Dome",c:"culture"},
+    {n:"Peace Memorial Museum",c:"culture"},{n:"Flame of Peace",c:"culture"},{n:"Tog til Okayama",c:"transport"}]},
+  {day:14,dest:"hiro",date:"Tirsdag 14.",title:"Art Collective — Naoshima",shink:true,sr:"→ Nagoya",fd:false,acts:[
+    {n:"Naoshima kunst-øen",c:"art"},{n:"Chichu Art Museum",c:"art"},
+    {n:"Art House Project",c:"art"},{n:"Yayoi Kusamas Græskar",c:"art"},{n:"Tog til Nagoya",c:"transport"}]},
+  {day:15,dest:"nagoya",date:"Onsdag 15.",title:"Ghibli Day",shink:false,fd:false,acts:[{n:"Ghibli Park",c:"entertainment"}]},
+  {day:16,dest:"nagoya",date:"Torsdag 16.",title:"Old School Japan",shink:false,fd:false,acts:[
+    {n:"Nagoya Castle",c:"culture"},{n:"Sumo — IG Arena (juli-turnering)",c:"entertainment"}]},
+  {day:17,dest:"nagoya",date:"Fredag 17.",title:"Samurai-stien",shink:false,fd:false,acts:[
+    {n:"Tsumago-juku — historisk landsby",c:"culture"},{n:"Nakasendo-ruten — vandring",c:"nature"},
+    {n:"Magome-juku — endemålet",c:"culture"},{n:"Aftensmad + taxa",c:"food"}]},
+  {day:18,dest:"kana",date:"Lørdag 18.",title:"Ancient City — Kanazawa",shink:false,fd:false,acts:[
+    {n:"Kanazawa Castle Park",c:"culture"},{n:"Higashi Chaya — geisha-kvarter",c:"culture"},
+    {n:"Nagamachi — samurai-kvarter",c:"culture"},{n:"Lokale boutique-butikker",c:"shopping"}]},
+  {day:19,dest:"kana",date:"Søndag 19.",title:"The Climb",shink:true,sr:"Kanazawa → Tokyo",fd:false,acts:[
+    {n:"Bestigning af Mt. Iozen",c:"nature",f:1},{n:"Shinkansen: Kanazawa → Tokyo",c:"transport"}]},
+  {day:20,dest:"tokyo2",date:"Mandag 20.",title:"Fri Dag",shink:false,fd:true,acts:[
+    {n:"Marine Day Lantern Festival — Odaiba",c:"culture"},{n:"Fri udforskning",c:"free",f:1}]},
+  {day:21,dest:"tokyo2",date:"Tirsdag 21.",title:"Nationalmuseet",shink:false,fd:false,acts:[{n:"Tokyo National Museum — Ueno",c:"art"}]},
+  {day:22,dest:"tokyo2",date:"Onsdag 22.",title:"teamLab Borderless",shink:false,fd:false,acts:[
+    {n:"teamLab Borderless — Azabudai Hills",c:"art"},{n:"Tokyo Tower",c:"culture"}]},
+  {day:23,dest:"tokyo2",date:"Torsdag 23.",title:"Ghibli del 2",shink:false,fd:false,acts:[
+    {n:"Ghibli Museum — Mitaka",c:"entertainment"},{n:"Inokashira Park",c:"nature"}]},
+  {day:24,dest:"tokyo2",date:"Fredag 24.",title:"Harajuku — WTF District",shink:false,fd:false,acts:[
+    {n:"Takeshita Street — kawaii-mode",c:"shopping"},{n:"Meiji Jingu Shrine",c:"culture"},{n:"Kawaii Monster Cafe",c:"entertainment"}]},
+  {day:25,dest:"tokyo2",date:"Lørdag 25.",title:"Shinjuku District",shink:false,fd:false,acts:[
+    {n:"Shinjuku Gyoen park",c:"nature"},{n:"Tokyo Metropolitan Gov. Building",c:"culture"},{n:"Neonskiltene i Shinjuku",c:"culture"}]},
+  {day:26,dest:"tokyo2",date:"Søndag 26.",title:"Nature by the Ocean",shink:false,fd:true,acts:[
+    {n:"Kasai Rinkai Park",c:"nature"},{n:"Fri tid ved kysten",c:"free",f:1}]},
+  {day:27,dest:"tokyo2",date:"Mandag 27.",title:"Holy Peak Dag",shink:false,fd:false,acts:[
+    {n:"National Diet Building",c:"culture"},{n:"Det Kejserlige Palads",c:"culture"},{n:"Bank of Japan Currency Museum",c:"art"}]},
+  {day:28,dest:"tokyo2",date:"Tirsdag 28.",title:"Fri Dag",shink:false,fd:true,acts:[{n:"Slap af — ingen fast plan",c:"free",f:1}]},
+  {day:29,dest:"tokyo2",date:"Onsdag 29.",title:"Asakusa",shink:false,fd:false,acts:[
+    {n:"Senso-ji templet",c:"culture"},{n:"Edo-Tokyo Museum",c:"art"}]},
+  {day:30,dest:"tokyo2",date:"Torsdag 30.",title:"Hjem",shink:false,fd:false,acts:[{n:"Fly hjem — Sayōnara, Japan",c:"transport"}]},
+];
+
+const LOCS=[
+  {id:1,name:"Haneda Lufthavn",day:1,dest:"tokyo1",cat:"transport",lat:35.5494,lng:139.7798,
+   desc:"Jeres første skridt på japansk jord. Et af Tokyos to internationale lufthavne, direkte forbundet med bymidten via Keikyu Line og monorail.",
+   photo:"haneda airport tokyo"},
+  {id:2,name:"Gotokuji Temple",day:2,dest:"tokyo1",cat:"culture",lat:35.6558,lng:139.6432,
+   desc:"Berømt for tusindvis af hvide vinkende kattefigurer (maneki-neko), opstillet af besøgende der er kommet med ønsker. En rolig og smuk tempel i Setagaya.",
+   photo:"gotokuji temple cat tokyo japan"},
+  {id:3,name:"Shimokitazawa",day:2,dest:"tokyo1",cat:"shopping",lat:35.6612,lng:139.6684,
+   desc:"Tokyos hippeste kvarter — et labyrint af smalle gyder fyldt med vintage-butikker, uafhængige caféer, brugte vinylplader og musikscener.",
+   photo:"shimokitazawa tokyo vintage cafe street"},
+  {id:4,name:"teamLab Planets",day:3,dest:"tokyo1",cat:"art",lat:35.6483,lng:139.7942,
+   desc:"Et immersivt digitalt kunstmuseum i Toyosu. Man går barfodet gennem vand og spektakulære lys-installationer. Tokyos mest unikke kunstoplevelse.",
+   photo:"teamlab planets tokyo light water art"},
+  {id:5,name:"Omoide Yokocho",day:3,dest:"tokyo1",cat:"food",lat:35.6938,lng:139.7005,
+   desc:"'Minde-gyde' — røgfyldte stræder bag Shinjuku Station med bittesmå yakitori-barer fra efterkrigstiden. Ikonstatus i Tokyos natteliv.",
+   photo:"omoide yokocho shinjuku night yakitori"},
+  {id:6,name:"Golden Gai",day:3,dest:"tokyo1",cat:"food",lat:35.6930,lng:139.7038,
+   desc:"200+ minibarer presset ind i seks smalle gyder i Shinjuku. Hver bar er unik med sin personlighed — og plads til max 8 gæster.",
+   photo:"golden gai shinjuku tokyo bar night"},
+  {id:7,name:"Kabuki-za Theatre",day:4,dest:"tokyo1",cat:"culture",lat:35.6694,lng:139.7631,
+   desc:"Japans primære kabuki-teater i Ginza. Den smukke rekonstruerede Meiji-era bygning er en attraktion i sig selv. Forestillingerne kan vare hele dagen.",
+   photo:"kabuki theater tokyo ginza japan stage"},
+  {id:8,name:"Uniqlo Ginza",day:4,dest:"tokyo1",cat:"shopping",lat:35.6695,lng:139.7648,
+   desc:"Uniqlos globale flagskibsbutik spredt over 12 etager i hjertet af Ginza — en af verdens dyreste shoppinggader pr. kvadratmeter.",
+   photo:"ginza tokyo luxury shopping street night"},
+  {id:9,name:"Hamarikyu Gardens",day:4,dest:"tokyo1",cat:"nature",lat:35.6576,lng:139.7627,
+   desc:"Et fredeligt japansk haveanlæg omgivet af skyskrabere. Det traditionelle tehus på søen serverer matcha og wagashi. En oase i storbyen.",
+   photo:"hamarikyu gardens tokyo pond tea house"},
+  {id:10,name:"Osaka Aquarium Kaiyukan",day:5,dest:"osaka",cat:"entertainment",lat:34.6552,lng:135.4295,
+   desc:"Et af verdens største akvarier med imponerende hvalhajer svømmende i en 9 meter dyb Stillehavs-tank. Magisk oplevelse for alle aldre.",
+   photo:"osaka aquarium kaiyukan whale shark"},
+  {id:11,name:"Tenjinbashi-suji",day:6,dest:"osaka",cat:"shopping",lat:34.6934,lng:135.5094,
+   desc:"Japans længste overdækkede shoppinggade — 2,6 km med hundredvis af butikker, restauranter og helt autentisk Osaka-stemning.",
+   photo:"tenjinbashi shopping arcade osaka japan"},
+  {id:12,name:"Shitennoji Tempel",day:7,dest:"osaka",cat:"culture",lat:34.6530,lng:135.5162,
+   desc:"Et af Japans ældste buddhistiske templer, grundlagt 593 e.Kr. af Prins Shotoku. Under Tanabata pyntes det med bambus og farverige dekorationer.",
+   photo:"shitennoji temple osaka japan ancient"},
+  {id:13,name:"Universal Studios Japan",day:8,dest:"osaka",cat:"entertainment",lat:34.6654,lng:135.4323,
+   desc:"Hjemsted for det monumentale Super Nintendo World og Wizarding World of Harry Potter. En af Asiens allerbedste forlystelsesparker.",
+   photo:"universal studios japan super nintendo world"},
+  {id:14,name:"Kiyomizu-dera",day:9,dest:"osaka",cat:"culture",lat:34.9948,lng:135.7850,
+   desc:"Kyotos ikoniske tempel på en klippeskrænt med fantastisk udsigt over den gamle by. Den berømte platform er samlet uden et eneste søm. UNESCO Verdensarv.",
+   photo:"kiyomizudera temple kyoto japan panorama"},
+  {id:15,name:"Sannenzaka & Ninenzaka",day:9,dest:"osaka",cat:"culture",lat:34.9965,lng:135.7815,
+   desc:"Historiske brolagte gader fra 1600-tallet ned mod Kiyomizu-dera, med traditionelle caféer, keramik og souvenir-butikker i smukke machiya-huse.",
+   photo:"sannenzaka ninenzaka kyoto stone path"},
+  {id:16,name:"Gion",day:9,dest:"osaka",cat:"culture",lat:35.0038,lng:135.7755,
+   desc:"Kyotos berømte historiske distrikt. Hanamikoji-gaden er mest autentisk — om aftenen ses maiko og geiko i traditionelle klæder.",
+   photo:"gion kyoto geisha street night lantern"},
+  {id:17,name:"Kuromon Ichiba Market",day:10,dest:"osaka",cat:"food",lat:34.6690,lng:135.5050,
+   desc:"'Osakas køkken' — et overdækket marked med over 170 stalde siden 1902, fyldt med frisk fisk, kobe-bøf, takoyaki og alt derimellem.",
+   photo:"kuromon market osaka japan food stalls"},
+  {id:18,name:"Nara Park",day:11,dest:"osaka",cat:"nature",lat:34.6851,lng:135.8391,
+   desc:"Over 1.200 halvtamme sika-hjorte vandrer frit — de anses som hellige budbringere i shinto. Lad dig nudde og sluk sultne dyreøjne med senbei-kiks.",
+   photo:"nara deer park japan feeding"},
+  {id:19,name:"Todai-ji",day:11,dest:"osaka",cat:"culture",lat:34.6888,lng:135.8399,
+   desc:"Verdens største træbygning huser Japans største bronze-Buddha — 15 meter høj, støbt i 752 e.Kr. En af Japans mest overvældende seværdigheder.",
+   photo:"todaiji temple nara great buddha japan"},
+  {id:20,name:"Fushimi Inari Taisha",day:12,dest:"osaka",cat:"culture",lat:34.9671,lng:135.7727,
+   desc:"Den berømte skovsti med over 10.000 orange torii-porte op ad Mt. Inari. En af Japans mest fotograferede og magiske seværdigheder.",
+   photo:"fushimi inari shrine torii gates kyoto"},
+  {id:21,name:"Atomic Bomb Dome",day:13,dest:"hiro",cat:"culture",lat:34.3955,lng:132.4536,
+   desc:"Genbaku Dōmu — den eneste bygning tæt på bombens epicenter der overlevede 6. august 1945. Nu UNESCO Verdensarvssted og verdens vigtigste fredssymbol.",
+   photo:"hiroshima atomic bomb dome peace memorial"},
+  {id:22,name:"Peace Memorial Museum",day:13,dest:"hiro",cat:"culture",lat:34.3916,lng:132.4535,
+   desc:"Et stærkt og bevægende museum der fortæller historien om bombningen, ofrenes liv, og den globale kamp for en atomvåbenfri verden.",
+   photo:"hiroshima peace museum memorial japan"},
+  {id:23,name:"Flame of Peace",day:13,dest:"hiro",cat:"culture",lat:34.3917,lng:132.4523,
+   desc:"Flammen tændt i 1964. Den slukkes først den dag alle atomvåben i verden er destruerede. En af verdens mest symbolske evighedsflammer.",
+   photo:"hiroshima peace park flame cenotaph"},
+  {id:24,name:"Chichu Art Museum",day:14,dest:"hiro",cat:"art",lat:34.4547,lng:133.9851,
+   desc:"Tadao Andos mesterværk — et museum bygget under Naoshimas jord. Rummer Claude Monets åkander, James Turrells lys og Walter De Marias sten.",
+   photo:"chichu art museum naoshima tadao ando"},
+  {id:25,name:"Art House Project",day:14,dest:"hiro",cat:"art",lat:34.4613,lng:133.9942,
+   desc:"Gamle bolighuse i Naoshimas fiskerby omdannet til permanente kunstinstallationer. Natur, arkitektur og kunst smelter unikt sammen.",
+   photo:"naoshima art house project honmura japan"},
+  {id:26,name:"Yayoi Kusamas Græskar",day:14,dest:"hiro",cat:"art",lat:34.4590,lng:133.9988,
+   desc:"Det ikoniske store gule punkt-græskar ved havnen — Yayoi Kusamas mest elskede offentlige skulptur, med Naoshimas hav som baggrund.",
+   photo:"yayoi kusama yellow pumpkin naoshima japan"},
+  {id:27,name:"Ghibli Park",day:15,dest:"nagoya",cat:"entertainment",lat:35.1554,lng:137.1548,
+   desc:"Studio Ghiblis tematiske park i Aichi Expo Memorial Park. Indeholder Totoros Skov, Hexens Hus og Det Store Magasin fra Howls Moving Castle.",
+   photo:"ghibli park totoro japan studio"},
+  {id:28,name:"Nagoya Castle",day:16,dest:"nagoya",cat:"culture",lat:35.1852,lng:136.8994,
+   desc:"Opført i 1612 for Tokugawa Ieyasus søn. De gyldne shachihoko-tigerfisk på taget er Nagoyaborgernes stolthed. Et af Japans tre store historiske borge.",
+   photo:"nagoya castle japan golden shachihoko"},
+  {id:29,name:"IG Arena — Nagoya Basho",day:16,dest:"nagoya",cat:"entertainment",lat:35.1817,lng:136.9360,
+   desc:"Juli er Nagoya Basho — en af seks årlige grand sumo-turneringer. 15 dage med de bedste rikishi i Japan, i det renoverede IG Arena.",
+   photo:"sumo wrestling japan basho tournament"},
+  {id:30,name:"Tsumago-juku",day:17,dest:"nagoya",cat:"culture",lat:35.5336,lng:137.6050,
+   desc:"En af de bedst bevarede posthuse-byer på den historiske Nakasendo-rute. Al modernisering er forbudt — det ser præcist ud som under Edo-perioden.",
+   photo:"tsumago juku nakasendo edo japan historic"},
+  {id:31,name:"Magome-juku",day:17,dest:"nagoya",cat:"nature",lat:35.5252,lng:137.5800,
+   desc:"Endemålet for den 8 km lange vandreture fra Tsumago — en charmerende bakke-landsby med panoramaudsigt over Kiso Valley og Centralalperne.",
+   photo:"magome juku kiso valley mountain japan"},
+  {id:32,name:"Kanazawa Castle Park",day:18,dest:"kana",cat:"culture",lat:36.5659,lng:136.6626,
+   desc:"Hjemsted for den mægtige Maeda-klan. Den rekonstruerede hvide port og mure er pragtfulde. Kenroku-en haven rett ved siden af er top 3 i Japan.",
+   photo:"kanazawa castle park japan white"},
+  {id:33,name:"Higashi Chaya",day:18,dest:"kana",cat:"culture",lat:36.5720,lng:136.6668,
+   desc:"Et af Japans tre store geisha-distrikter, etableret i 1820. De bevarede ochaya-tehuse langs brolægningsgaderne er unikt smukke og autentiske.",
+   photo:"higashi chaya kanazawa japan geisha district"},
+  {id:34,name:"Nagamachi",day:18,dest:"kana",cat:"culture",lat:36.5595,lng:136.6528,
+   desc:"Velbevarede samurai-boliger fra Edo-perioden langs vandkanalerne. Jordmure, bambusgærder og japanske haver vidner om krigerklassens dagligliv.",
+   photo:"nagamachi kanazawa samurai district japan"},
+  {id:35,name:"Mt. Iozen",day:19,dest:"kana",cat:"nature",lat:36.5500,lng:136.7200,
+   desc:"En vandring op ad Mt. Iozen giver panoramaudsigt over Kanazawa og Japan-havet. På klare dage ses det snedækkede Hakusan-bjerg i det fjerne.",
+   photo:"kanazawa japan mountain view hiking"},
+  {id:36,name:"Odaiba — Marine Day",day:20,dest:"tokyo2",cat:"culture",lat:35.6264,lng:139.7774,
+   desc:"Marine Day fejres med tusindvis af lanterner i vandet ved Odaiba-stranden. En magisk aftenstund på Tokyos kunstige ø med Rainbow Bridge som kulisse.",
+   photo:"odaiba tokyo bay night rainbow bridge"},
+  {id:37,name:"Tokyo National Museum",day:21,dest:"tokyo2",cat:"art",lat:35.7188,lng:139.7763,
+   desc:"Japans ældste og største museum grundlagt 1872. Rummer samuraisværd, kimonoer, keramik og over 120.000 genstande fra Japans og Asiens civilisation.",
+   photo:"tokyo national museum ueno japan"},
+  {id:38,name:"teamLab Borderless",day:22,dest:"tokyo2",cat:"art",lat:35.6561,lng:139.7296,
+   desc:"Teamlabs nye flagskib i Azabudai Hills — 10.000 m² grænseløst digitalt kunstværk, hvor rummene flyder ind i hinanden og aldrig ser ens ud.",
+   photo:"teamlab borderless tokyo azabudai digital art"},
+  {id:39,name:"Tokyo Tower",day:22,dest:"tokyo2",cat:"culture",lat:35.6586,lng:139.7454,
+   desc:"Tokyos ikoniske orange stål-tårn fra 1958, inspireret af Eiffeltårnet men 13 meter højere. 333 meter med to udsigtsplatforme og smukt oplyst om natten.",
+   photo:"tokyo tower japan night red white"},
+  {id:40,name:"Ghibli Museum",day:23,dest:"tokyo2",cat:"entertainment",lat:35.6963,lng:139.5703,
+   desc:"Den intime, drømmende museum skabt af Hayao Miyazaki selv i Mitaka. Arkitekturen er kunst — ingen vejledninger, bare undren og opdagelse.",
+   photo:"ghibli museum mitaka tokyo hayao miyazaki"},
+  {id:41,name:"Inokashira Park",day:23,dest:"tokyo2",cat:"nature",lat:35.6985,lng:139.5726,
+   desc:"En rolig park med en central sø og en lille zoo, tæt ved Ghibli Museum. Perfekt til eftermiddagsafslapning i en af Tokyos smukkeste grønne oaser.",
+   photo:"inokashira park tokyo lake japan"},
+  {id:42,name:"Takeshita Street",day:24,dest:"tokyo2",cat:"shopping",lat:35.6697,lng:139.7048,
+   desc:"Harajukus kaotiske, farvebombede teenager-gade. Cosplay-butikker, kæmpe crepes, kawaii-mode og alt det Japan er verdensberømt for af det skøre.",
+   photo:"takeshita street harajuku tokyo fashion kawaii"},
+  {id:43,name:"Meiji Jingu",day:24,dest:"tokyo2",cat:"culture",lat:35.6763,lng:139.6993,
+   desc:"Et fredfyldt shinto-helligdom omgivet af 70 hektar kunstig skov midt i Tokyos larm. Viet kejser Meiji og kejserinde Shoken. Stor torii ved indgangen.",
+   photo:"meiji shrine tokyo forest torii gate"},
+  {id:44,name:"Shinjuku Gyoen",day:25,dest:"tokyo2",cat:"nature",lat:35.6851,lng:139.7100,
+   desc:"En 58 hektar park med japanske, franske og engelske have-afsnit — en perfekt grøn oase til at restituere fra det vilde Shinjuku rundt om hjørnet.",
+   photo:"shinjuku gyoen park tokyo garden landscape"},
+  {id:45,name:"Tokyo Metropolitan Gov. Bygning",day:25,dest:"tokyo2",cat:"culture",lat:35.6894,lng:139.6922,
+   desc:"Gratis udsigtsplatforme på 202 meters højde med 360° panorama over Tokyo. På klare dage ses Mt. Fuji i horisonten — magisk i solnedgangen.",
+   photo:"tokyo metropolitan government building observation sunset"},
+  {id:46,name:"Kasai Rinkai Park",day:26,dest:"tokyo2",cat:"nature",lat:35.6376,lng:139.8608,
+   desc:"En bred kystpark i Edogawa med udsigt over Tokyo Bay, et pariserhjul, Tokyo Sea Life Park og fremragende fugletrækning til vandrefugle.",
+   photo:"kasai rinkai park tokyo bay waterfront"},
+  {id:47,name:"National Diet Building",day:27,dest:"tokyo2",cat:"culture",lat:35.6751,lng:139.7447,
+   desc:"Japans parlament, færdigbygget 1936 i granit. Gratis adgang til repræsentanternes kammer og den imponerende centrale hal med pyramidetårn.",
+   photo:"national diet building tokyo japan parliament"},
+  {id:48,name:"Det Kejserlige Palads",day:27,dest:"tokyo2",cat:"culture",lat:35.6852,lng:139.7528,
+   desc:"Hjemsted for den japanske kejserlige familie. East Garden er åben for alle — slotsmuren, grafterne og broen Nijubashi er smukke på alle årstider.",
+   photo:"imperial palace tokyo japan moat bridge"},
+  {id:49,name:"Bank of Japan Currency Museum",day:27,dest:"tokyo2",cat:"art",lat:35.6869,lng:139.7741,
+   desc:"Et overraskende fascinerende museum om Japans monetære historie — fra ris og silke som valuta til nutidens yen. Smukt Meiji-era byggeri i Nihonbashi.",
+   photo:"nihonbashi tokyo bank of japan building"},
+  {id:50,name:"Senso-ji",day:29,dest:"tokyo2",cat:"culture",lat:35.7148,lng:139.7967,
+   desc:"Tokyos ældste og mest besøgte tempel i Asakusa, grundlagt 645 e.Kr. Nakamise-handelsgaden er fyldt med traditionelle souvenirs og street food.",
+   photo:"sensoji asakusa tokyo temple lantern night"},
+  {id:51,name:"Edo-Tokyo Museum",day:29,dest:"tokyo2",cat:"art",lat:35.6967,lng:139.7970,
+   desc:"Et imponerende museum om Tokyos 400-årige historie fra Edo-perioden til nutiden. Netop genåbnet efter renovering med storslåede dioramer og modeller.",
+   photo:"edo tokyo museum sumida history japan"},
+];
+
+/* STATE */
+let aDest="all",aCat="all",curView="tl",map=null,markers=[];
+
+/* TIMELINE */
+function renderTL(){
+  const tl=document.getElementById('tl');
+  tl.innerHTML='';
+  let vis=0;
+  DO.forEach(dest=>{
+    if(aDest!=="all"&&aDest!==dest)return;
+    const dDays=DAYS.filter(d=>d.dest===dest);
+    let sv=false;
+    const sec=document.createElement('div');sec.className='dsec';
+    sec.innerHTML=`<div class="dh"><h2 class="dh-name">${DL[dest]}</h2><span class="dh-days">${DD[dest]}</span><div class="dh-bar"></div></div>`;
+    const grid=document.createElement('div');grid.className='dgrid';
+    dDays.forEach(day=>{
+      const acts=aCat==="all"?day.acts:day.acts.filter(a=>a.c===aCat);
+      const card=document.createElement('div');card.className=`dcard dest-${day.dest}`;
+      if(!acts.length)card.classList.add('hidden');else{sv=true;vis++;}
+      card.innerHTML=`<div class="dstripe"></div><div class="dinner"><div class="dnc"><div class="dn">${day.day}</div><div class="dl">Dag</div></div><div class="ddiv"></div><div class="dbody"><div class="dtrow"><span class="dtitle">${day.title}</span>${day.shink?`<span class="bshink">&#8658; ${day.sr}</span>`:''}${day.fd?'<span class="bfree">Fri dag</span>':''}</div><div class="acts">${acts.map(a=>`<div class="act${a.f?' fa':''}"><span class="adot ${a.c==='culture'?'ac':a.c==='food'?'af':a.c==='nature'?'an':a.c==='shopping'?'as':a.c==='transport'?'at':a.c==='art'?'aa':a.c==='entertainment'?'ae':'az'}"></span>${a.n}</div>`).join('')}</div></div></div>`;
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    if(sv)tl.appendChild(sec);
+  });
+  const emp=document.getElementById('emp');
+  const rc=document.getElementById('rc');
+  if(vis===0){emp.classList.add('vis');rc.textContent='';}
+  else{emp.classList.remove('vis');rc.textContent=`${vis} dag${vis!==1?'e':''} vist — ${aDest==="all"?"alle destinationer":DL[aDest]}`;}
+}
+
+/* MAP */
+function initMap(){
+  if(map)return;
+  map=L.map('map',{zoomControl:true}).setView([36.2,137.5],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom:19
+  }).addTo(map);
+  LOCS.forEach(loc=>{
+    const ico=L.divIcon({
+      className:'',
+      html:`<div class="mk dest-${loc.dest}" title="${loc.name}">${loc.day}</div>`,
+      iconSize:[30,30],iconAnchor:[15,15]
+    });
+    const m=L.marker([loc.lat,loc.lng],{icon:ico}).addTo(map);
+    m._locData=loc;
+    m.on('click',()=>openPanel(loc));
+    markers.push({m,loc});
+  });
+  filterMap();
+}
+
+function filterMap(){
+  if(!map)return;
+  const vis=[];
+  markers.forEach(({m,loc})=>{
+    const dOk=aDest==="all"||loc.dest===aDest;
+    const cOk=aCat==="all"||loc.cat===aCat;
+    if(dOk&&cOk){if(!map.hasLayer(m))m.addTo(map);vis.push(m);}
+    else if(map.hasLayer(m))map.removeLayer(m);
+  });
+  if(vis.length>0){
+    try{map.fitBounds(L.featureGroup(vis).getBounds().pad(0.15));}catch(e){}
+  }
+}
+
+function openPanel(loc){
+  const sp=document.getElementById('sp');
+  const img=document.getElementById('sp-img');
+  const ld=document.getElementById('sp-ld');
+  img.style.opacity=0;img.src='';ld.style.display='flex';
+  img.src=`https://source.unsplash.com/600x400/?${encodeURIComponent(loc.photo)}`;
+  document.getElementById('sp-badges').innerHTML=
+    `<span class="sbadge sb-day">Dag ${loc.day}</span>`+
+    `<span class="sbadge" style="background:${DC[loc.dest]};color:#fff">${DL[loc.dest]}</span>`+
+    `<span class="sbadge" style="background:${CC[loc.cat]||'#888'};color:#fff">${CL[loc.cat]}</span>`;
+  document.getElementById('sp-name').textContent=loc.name;
+  document.getElementById('sp-desc').textContent=loc.desc;
+  sp.classList.add('open');
+}
+function closePanel(){document.getElementById('sp').classList.remove('open');}
+
+/* VIEW SWITCH */
+function setView(v){
+  curView=v;
+  document.getElementById('tv').style.display=v==='tl'?'block':'none';
+  document.getElementById('mv').style.display=v==='map'?'block':'none';
+  document.getElementById('bleg').style.display=v==='tl'?'flex':'none';
+  document.getElementById('btn-tl').classList.toggle('active',v==='tl');
+  document.getElementById('btn-map').classList.toggle('active',v==='map');
+  if(v==='map'){
+    setTimeout(()=>{initMap();map.invalidateSize();filterMap();},60);
+  }
+}
+
+/* FILTERS */
+document.querySelectorAll('.dtab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.dtab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');aDest=t.dataset.dest;closePanel();
+    if(curView==='tl')renderTL();else filterMap();
+  });
+});
+document.querySelectorAll('.cpill').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.cpill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');aCat=p.dataset.cat;closePanel();
+    if(curView==='tl')renderTL();else filterMap();
+  });
+});
+
+renderTL();
+</script>
+</body>
+</html>
