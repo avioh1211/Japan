@@ -36,6 +36,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 .vbtn{height:48px;padding:0 22px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;cursor:pointer;background:none;border:none;color:var(--ink-m);border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap}
 .vbtn:hover{color:var(--ink)}
 .vbtn.active{color:var(--ink);border-bottom-color:var(--ink)}
+.vbtn.blog{color:var(--red);border-bottom-color:rgba(196,64,43,.3)}
+.vbtn.blog:hover{color:var(--red)}
+.vbtn.blog.active{color:var(--red);border-bottom-color:var(--red)}
 .vbtn svg{width:14px;height:14px;flex-shrink:0}
 
 /* ── DEST TABS ──────────────────────────────────────────── */
@@ -353,7 +356,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     </svg>
     Interaktivt Kort
   </button>
-  <button class="vbtn" id="btn-blog" onclick="setView('blog')">
+  <button class="vbtn blog" id="btn-blog" onclick="setView('blog')">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
       <rect x="1.5" y="1.5" width="13" height="13" rx="1.5"/>
       <path d="M4.5 5.5h7M4.5 8h7M4.5 10.5h4"/>
