@@ -78,6 +78,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 .dh-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:-.2px}
 .dh-days{font-size:11px;color:var(--ink-m);letter-spacing:.05em}
 .dh-bar{flex:1;height:1px;background:linear-gradient(to right,rgba(0,0,0,.09),transparent)}
+
+/* Hotel card */
+.hcard{display:flex;align-items:flex-start;gap:13px;background:var(--white);border:1px solid rgba(0,0,0,.07);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.hicon{width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--ink-m)}
+.hbody{flex:1;min-width:0}
+.hname{font-family:'Cormorant Garamond',serif;font-size:15.5px;font-weight:500;color:var(--ink);margin-bottom:2px;line-height:1.3}
+.hnote{display:inline-block;margin-left:8px;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--red);font-weight:500;vertical-align:middle}
+.haddr{font-size:11.5px;color:var(--ink-l);line-height:1.4;margin-bottom:4px}
+.hdates{font-size:10.5px;color:var(--ink-m);letter-spacing:.02em}
+.hdir{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--ink);text-decoration:none;border:1px solid rgba(0,0,0,.12);border-radius:100px;padding:6px 12px;transition:background .15s,transform .12s;white-space:nowrap;align-self:center}
+.hdir:hover{background:rgba(0,0,0,.04);transform:translateY(-1px)}
+.hdir svg{width:12px;height:12px;opacity:.6}
+@media(max-width:560px){
+  .hcard{flex-direction:column}
+  .hdir{align-self:flex-start}
+}
 .dgrid{display:grid;gap:9px}
 .dcard{background:var(--white);border-radius:9px;border:1px solid rgba(0,0,0,.07);overflow:hidden;display:flex;transition:border-color .15s,transform .15s,box-shadow .15s;animation:fadeUp .32s ease both}
 .dcard:hover{border-color:rgba(0,0,0,.13);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.05)}
@@ -173,6 +189,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 .btoolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
 .bonly{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-l);cursor:pointer;user-select:none}
 .bonly input{width:14px;height:14px;accent-color:var(--ink);cursor:pointer}
+
+/* Auth bar */
+.bauthbar{display:flex;justify-content:flex-end;margin-bottom:14px;min-height:34px}
+.buser{display:flex;align-items:center;gap:9px;background:var(--white);border:1px solid rgba(0,0,0,.08);border-radius:100px;padding:4px 14px 4px 4px}
+.buser-av{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;overflow:hidden}
+.buser-av img{width:100%;height:100%;object-fit:cover}
+.buser-name{font-size:12px;color:var(--ink);font-weight:500}
+.buser-out{background:none;border:none;color:var(--ink-m);font-size:11px;cursor:pointer;text-decoration:underline;padding:0 2px 0 4px;font-family:'DM Sans',sans-serif}
+.buser-out:hover{color:var(--ink)}
+
+/* Gate / sign-in prompt (compact, read access stays open) */
+.bsignin{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1px solid rgba(0,0,0,.12);border-radius:100px;padding:7px 16px;font-size:11.5px;font-weight:500;color:var(--ink-l);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s}
+.bsignin:hover{background:rgba(0,0,0,.03);color:var(--ink)}
+
+/* Author badges */
+.bauthor{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-m);margin-top:6px}
+.bauthor-av{width:16px;height:16px;border-radius:50%;background:var(--ink-m);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;flex-shrink:0;overflow:hidden}
+.bauthor-av img{width:100%;height:100%;object-fit:cover}
+.bphoto-by{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);color:#fff;font-size:8.5px;padding:8px 5px 3px;letter-spacing:.02em}
 .bpost{background:var(--white);border:1px solid rgba(0,0,0,.07);border-radius:11px;margin-bottom:16px;overflow:hidden;display:flex;animation:fadeUp .3s ease both}
 .bpost.hidden{display:none}
 .bstripe{width:4px;flex-shrink:0}
@@ -194,6 +229,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 }
 .btext:focus{outline:none;border-color:rgba(0,0,0,.3);background:var(--white)}
 .btext::placeholder{color:var(--ink-m)}
+.btext[readonly]{background:transparent;border-color:rgba(0,0,0,.04);cursor:default;color:var(--ink-l)}
+.btext[readonly]::placeholder{font-style:italic}
 .bsaved{font-size:10px;color:var(--ink-m);margin-top:5px;height:13px;opacity:0;transition:opacity .25s}
 .bsaved.show{opacity:1}
 .bphotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;margin-top:12px}
@@ -362,7 +399,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 <!-- ── FOTOBOG ───────────────────────────────────────────── -->
 <div id="bv">
   <div class="blm">
-    <div class="btoolbar">
+    <div class="bauthbar" id="bauthbar"></div>
+    <div class="btoolbar" id="btoolbar">
       <div class="bt-left">
         <span id="bcount" class="rcount"></span>
       </div>
@@ -402,6 +440,34 @@ const DL = {
 };
 const DO  = ["tokyo1","osaka","hiro","nagoya","kana","tokyo2"];
 const DD  = {tokyo1:"Dag 1–4",osaka:"Dag 5–12",hiro:"Dag 13–14",nagoya:"Dag 15–17",kana:"Dag 18–19",tokyo2:"Dag 20–30"};
+
+/* ── DATA: HOTELS ───────────────────────────────────────── */
+const HOTELS = {
+  tokyo1: { name:"Mi-Loft Shibuya", addr:"2-1-12 Shoto, Shibuya City, Tokyo 150-0046, Japan", ci:"1. jul", co:"5. jul" },
+  osaka:  { name:"Bijou Suites Pieces", addr:"2-3-15 Haginochaya, Nishinari Ward, Osaka, 557-0004, Japan", ci:"5. jul", co:"13. jul" },
+  nagoya: { name:"大吉屋2号館 ワンフロア貸切部屋 名駅離れ (Daikichiya 2nd Building)", addr:"2-36-7 Noritake, Nakamura Ward, Nagoya, Aichi 453-0014, Japan", ci:"14. jul", co:"18. jul" },
+  kana:   { name:"HOTEL AMANEK Kanazawa", addr:"2-25-17 Katamachi, Kanazawa, Ishikawa 920-0981, Japan", ci:"18. jul", co:"20. jul" },
+  tokyo2: { name:"Hotel JAL City Tokyo Toyosu", addr:"6-4-20 Toyosu, Koto City, Tokyo 135-0061, Japan", ci:"20. jul", co:"30. jul" },
+};
+/* Ekstra overnatning kun for Annette, Avi og Jonathan, natten mellem dag 13 og 14 */
+const OKAYAMA_HOTEL = { name:"Daiwa Roynet Hotel Okayama Ekimae", addr:"Okayama, Japan", ci:"13. jul", co:"14. jul", note:"Kun Annette, Avi & Jonathan" };
+
+function hotelCardHtml(h){
+  const q = encodeURIComponent(h.addr);
+  return `
+    <div class="hcard">
+      <svg class="hicon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 13.5V4.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v9M1 13.5h14M4 13.5V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4.5"/></svg>
+      <div class="hbody">
+        <div class="hname">${h.name}${h.note ? `<span class="hnote">${h.note}</span>` : ''}</div>
+        <div class="haddr">${h.addr}</div>
+        <div class="hdates">Check-in ${h.ci} &middot; Check-out ${h.co}</div>
+      </div>
+      <a class="hdir" href="https://www.google.com/maps/dir/?api=1&destination=${q}" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2C5.24 2 3 4.24 3 7c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5z"/><circle cx="8" cy="7" r="1.8"/></svg>
+        Vejvisning
+      </a>
+    </div>`;
+}
 const DC  = {tokyo1:"#1E3A5F",osaka:"#B83A1A",hiro:"#1F5F5B",nagoya:"#7A4020",kana:"#3A5F2A",tokyo2:"#2C4F7C"};
 const CC  = {culture:"#8B5E14",food:"#B83A1A",nature:"#3A6630",shopping:"#5C3A8B",transport:"#1A4E8B",art:"#8B1A6B",entertainment:"#C47820",free:"#7A7670"};
 const CL  = {culture:"Kultur",food:"Mad",nature:"Natur",shopping:"Shopping",transport:"Transport",art:"Kunst",entertainment:"Oplevelser",free:"Fri tid"};
@@ -658,7 +724,9 @@ function renderTL(){
         <h2 class="dh-name">${DL[dest]}</h2>
         <span class="dh-days">${DD[dest]}</span>
         <div class="dh-bar"></div>
-      </div>`;
+      </div>
+      ${HOTELS[dest] ? hotelCardHtml(HOTELS[dest]) : ''}
+      ${dest === 'hiro' ? hotelCardHtml(OKAYAMA_HOTEL) : ''}`;
 
     const grid = document.createElement('div');
     grid.className = 'dgrid';
@@ -826,6 +894,7 @@ function setView(v){
     }, 60);
   }
   if(v === 'blog'){
+    if (typeof updateAuthUI === 'function') updateAuthUI();
     renderBlog();
   }
 }
@@ -852,13 +921,31 @@ document.querySelectorAll('.cpill').forEach(p => {
 });
 
 /* ── FOTOBOG: STATE (data comes live from Firebase, see module script below) */
-window.blogData = window.blogData || {}; // { "3": { text:"...", photos:[{url,path}, ...] } }
+window.blogData = window.blogData || {}; // { "3": { text, textAuthor:{name,email,photoURL}, photos:[{url,path,author},...] } }
 
 /* ── FOTOBOG: RENDER ─────────────────────────────────────── */
 let bOnlyFilled = false;
 
+function initials(name){
+  if(!name) return '?';
+  return name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase();
+}
+
+function authorChip(author){
+  if(!author || !author.name) return '';
+  const av = author.photoURL
+    ? `<img src="${author.photoURL}" alt="">`
+    : initials(author.name);
+  return `<span class="bauthor"><span class="bauthor-av">${av}</span>${author.name}</span>`;
+}
+
 function renderBlog(){
+  const toolbar = document.getElementById('btoolbar');
   const feed = document.getElementById('bfeed');
+  const canWrite = !!window.currentUser;
+
+  toolbar.style.display = 'flex';
+
   const focused = document.activeElement;
   const focusedDay = (focused && focused.classList && focused.classList.contains('btext'))
     ? focused.dataset.day : null;
@@ -879,8 +966,16 @@ function renderBlog(){
     const photosHtml = (e.photos || []).map((p, i) => `
       <div class="bphoto">
         <img src="${p.url}" loading="lazy" onclick="openLightbox('${p.url.replace(/'/g,"\\'")}')">
-        <button class="bphoto-del" onclick="deletePhoto(${day.day}, ${i})" title="Fjern billede">&#215;</button>
+        ${p.author && p.author.name ? `<div class="bphoto-by">${p.author.name}</div>` : ''}
+        ${canWrite ? `<button class="bphoto-del" onclick="deletePhoto(${day.day}, ${i})" title="Fjern billede">&#215;</button>` : ''}
       </div>`).join('');
+
+    const addPhotoHtml = canWrite ? `
+          <label class="baddphoto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+            Foto
+            <input type="file" accept="image/*" multiple onchange="addPhotos(${day.day}, this.files); this.value=''">
+          </label>` : '';
 
     post.innerHTML = `
       <div class="bstripe"></div>
@@ -890,31 +985,28 @@ function renderBlog(){
           <span class="btitle">${day.title}</span>
         </div>
         <div class="bdest">${DL[day.dest]} &middot; ${DD[day.dest]}</div>
-        <textarea class="btext" placeholder="Skriv om dagen — hvad skete der, hvad smagte I, hvad overraskede jer?"
-          data-day="${day.day}">${e.text || ''}</textarea>
-        <div class="bsaved" id="bsaved-${day.day}">Gemt</div>
+        <textarea class="btext" placeholder="${canWrite ? 'Skriv om dagen — hvad skete der, hvad smagte I, hvad overraskede jer?' : 'Ingen tekst endnu.'}"
+          data-day="${day.day}" ${canWrite ? '' : 'readonly'}>${e.text || ''}</textarea>
+        <div class="bsaved" id="bsaved-${day.day}">${authorChip(e.textAuthor)}</div>
         <div class="bphotos">
           ${photosHtml}
-          <label class="baddphoto">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
-            Foto
-            <input type="file" accept="image/*" multiple onchange="addPhotos(${day.day}, this.files); this.value=''">
-          </label>
+          ${addPhotoHtml}
         </div>
       </div>`;
 
     feed.appendChild(post);
   });
 
-  document.querySelectorAll('.btext').forEach(t => {
-    t.addEventListener('input', onTextInput);
-    // restore focus/cursor if this textarea was being edited when a live update came in
-    if(focusedDay && t.dataset.day === focusedDay){
-      t.focus();
-      const len = t.value.length;
-      t.setSelectionRange(len, len);
-    }
-  });
+  if(canWrite){
+    document.querySelectorAll('.btext').forEach(t => {
+      t.addEventListener('input', onTextInput);
+      if(focusedDay && t.dataset.day === focusedDay){
+        t.focus();
+        const len = t.value.length;
+        t.setSelectionRange(len, len);
+      }
+    });
+  }
 
   const filledCount = Object.values(window.blogData).filter(e => (e.text && e.text.trim()) || (e.photos && e.photos.length)).length;
   document.getElementById('bcount').textContent =
@@ -931,8 +1023,9 @@ function onTextInput(ev){
     window.saveText(day, ev.target.value).then(() => {
       const badge = document.getElementById(`bsaved-${day}`);
       if(badge){
+        badge.innerHTML = authorChip(window.currentUser) || 'Gemt';
         badge.classList.add('show');
-        setTimeout(() => badge.classList.remove('show'), 1400);
+        setTimeout(() => badge.classList.remove('show'), 1800);
       }
     });
   }, 600);
@@ -967,6 +1060,9 @@ import {
 import {
   getStorage, ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBI7aYK9u0oVlXznoTrlGGiLZCUlYEJa48",
@@ -980,11 +1076,76 @@ const firebaseConfig = {
 const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
+const auth    = getAuth(app);
 const blogCol = collection(db, "blogEntries");
 
+/* Familiens godkendte konti — navnet vises ved tekst og billeder */
+const ALLOWED = {
+  "green9livesgaming@gmail.com": "Lydia",
+  "michael.ohayon1311@gmail.com": "Michael",
+  "jonathan.oh1010@gmail.com": "Jonathan",
+  "ohayonson@gmail.com": "Avi",
+  "annette.buhl@gmail.com": "Annette"
+};
+
 window.blogData = {};
+window.currentUser = null;
 
 function dayDocRef(day){ return doc(db, "blogEntries", String(day)); }
+
+function updateAuthUI(){
+  const bar = document.getElementById('bauthbar');
+  if(!bar) return;
+  if(window.currentUser){
+    const u = window.currentUser;
+    const av = u.photoURL ? `<img src="${u.photoURL}" alt="">` : (u.name || '?')[0].toUpperCase();
+    bar.innerHTML = `
+      <div class="buser">
+        <span class="buser-av">${av}</span>
+        <span class="buser-name">${u.name}</span>
+        <button class="buser-out" onclick="googleSignOut()">Log ud</button>
+      </div>`;
+  } else {
+    bar.innerHTML = `
+      <button class="bsignin" onclick="googleSignIn()">
+        <svg viewBox="0 0 18 18" width="14" height="14"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.81 2.73v2.27h2.92c1.71-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.97H.96A8.997 8.997 0 0 0 0 9c0 1.45.35 2.83.96 4.03l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.97l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+        Log ind for at skrive &amp; uploade
+      </button>`;
+  }
+}
+window.updateAuthUI = updateAuthUI;
+
+window.googleSignIn = function(){
+  signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
+    console.error('Login fejl:', err);
+    alert('Login mislykkedes. Prøv igen.');
+  });
+};
+
+window.googleSignOut = function(){
+  signOut(auth);
+};
+
+onAuthStateChanged(auth, (user) => {
+  if(!user){
+    window.currentUser = null;
+    updateAuthUI();
+    if (document.getElementById('bv').style.display === 'block' && typeof renderBlog === 'function') renderBlog();
+    return;
+  }
+  const email = (user.email || '').toLowerCase();
+  const allowedName = ALLOWED[email];
+  if(!allowedName){
+    alert('Denne Google-konto har ikke adgang til familiens fotobog. Log ind med en af de godkendte konti.');
+    signOut(auth);
+    window.currentUser = null;
+    updateAuthUI();
+    return;
+  }
+  window.currentUser = { name: allowedName, email, photoURL: user.photoURL };
+  updateAuthUI();
+  if (document.getElementById('bv').style.display === 'block' && typeof renderBlog === 'function') renderBlog();
+});
 
 /* Live sync: every device sees updates the moment they happen.
    renderBlog() itself skips resetting a textarea the person is
@@ -1001,11 +1162,17 @@ onSnapshot(blogCol, (snap) => {
 });
 
 window.saveText = function(day, text){
-  return setDoc(dayDocRef(day), { text }, { merge: true });
+  if(!window.currentUser) return Promise.reject('not signed in');
+  return setDoc(dayDocRef(day), {
+    text,
+    textAuthor: { name: window.currentUser.name, email: window.currentUser.email, photoURL: window.currentUser.photoURL || null }
+  }, { merge: true });
 };
 
 window.addPhotos = async function(day, files){
+  if(!window.currentUser){ alert('Log ind for at tilføje billeder.'); return; }
   if(!files || !files.length) return;
+  const author = { name: window.currentUser.name, email: window.currentUser.email, photoURL: window.currentUser.photoURL || null };
   for (const file of Array.from(files)) {
     try {
       const path = `photos/day_${day}/${Date.now()}_${file.name}`;
@@ -1013,7 +1180,7 @@ window.addPhotos = async function(day, files){
       await uploadBytes(sref, file);
       const url = await getDownloadURL(sref);
       const current = (window.blogData[day] && window.blogData[day].photos) || [];
-      const updated = [...current, { url, path }];
+      const updated = [...current, { url, path, author }];
       window.blogData[day] = { ...(window.blogData[day] || {}), photos: updated };
       await setDoc(dayDocRef(day), { photos: updated }, { merge: true });
     } catch(e) {
@@ -1025,6 +1192,7 @@ window.addPhotos = async function(day, files){
 };
 
 window.deletePhoto = async function(day, idx){
+  if(!window.currentUser){ alert('Log ind for at fjerne billeder.'); return; }
   const current = (window.blogData[day] && window.blogData[day].photos) || [];
   const target  = current[idx];
   const updated = current.filter((_, i) => i !== idx);
