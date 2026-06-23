@@ -1110,7 +1110,7 @@ import {
   getStorage, ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1165,16 +1165,15 @@ function updateAuthUI(){
 window.updateAuthUI = updateAuthUI;
 
 window.googleSignIn = function(){
-  signInWithRedirect(auth, new GoogleAuthProvider()).catch(err => {
+  signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
     console.error('Login fejl:', err);
-    alert('Login mislykkedes. Prøv igen.');
+    if(err && err.code === 'auth/popup-blocked'){
+      alert('Din browser blokerede login-pop-up\'et. Tillad pop-ups for denne side og prøv igen.');
+    } else if(err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request'){
+      alert('Login mislykkedes (' + (err.code || 'ukendt fejl') + '). Prøv igen.');
+    }
   });
 };
-
-/* Catch the result when the browser returns from Google's login page */
-getRedirectResult(auth).catch(err => {
-  console.error('Redirect login fejl:', err);
-});
 
 window.googleSignOut = function(){
   signOut(auth);
