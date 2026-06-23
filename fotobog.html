@@ -233,6 +233,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 .btext[readonly]::placeholder{font-style:italic}
 .bsaved{font-size:10px;color:var(--ink-m);margin-top:5px;height:13px;opacity:0;transition:opacity .25s}
 .bsaved.show{opacity:1}
+.bsaved.err{color:var(--red);opacity:1;font-weight:500}
+.brow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.bsavebtn{flex-shrink:0;background:var(--ink);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s,transform .12s}
+.bsavebtn:hover{background:#2e2c29;transform:translateY(-1px)}
+.bsavebtn:active{transform:translateY(0)}
 .bphotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;margin-top:12px}
 .bphoto{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;background:#E8E5DC}
 .bphoto img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block;transition:transform .15s}
@@ -987,7 +992,10 @@ function renderBlog(){
         <div class="bdest">${DL[day.dest]} &middot; ${DD[day.dest]}</div>
         <textarea class="btext" placeholder="${canWrite ? 'Skriv om dagen — hvad skete der, hvad smagte I, hvad overraskede jer?' : 'Ingen tekst endnu.'}"
           data-day="${day.day}" ${canWrite ? '' : 'readonly'}>${e.text || ''}</textarea>
-        <div class="bsaved" id="bsaved-${day.day}">${authorChip(e.textAuthor)}</div>
+        <div class="brow">
+          ${canWrite ? `<button class="bsavebtn" onclick="saveNow(${day.day})">Gem</button>` : ''}
+          <div class="bsaved" id="bsaved-${day.day}">${authorChip(e.textAuthor)}</div>
+        </div>
         <div class="bphotos">
           ${photosHtml}
           ${addPhotoHtml}
@@ -1019,17 +1027,34 @@ function onTextInput(ev){
   window.blogData[day] = window.blogData[day] || {text:'', photos:[]};
   window.blogData[day].text = ev.target.value;
   clearTimeout(saveTimers[day]);
-  saveTimers[day] = setTimeout(() => {
-    window.saveText(day, ev.target.value).then(() => {
-      const badge = document.getElementById(`bsaved-${day}`);
-      if(badge){
-        badge.innerHTML = authorChip(window.currentUser) || 'Gemt';
-        badge.classList.add('show');
-        setTimeout(() => badge.classList.remove('show'), 1800);
-      }
-    });
-  }, 600);
+  saveTimers[day] = setTimeout(() => doSave(day, ev.target.value), 800);
 }
+
+function doSave(day, text){
+  const badge = document.getElementById(`bsaved-${day}`);
+  return window.saveText(day, text).then(() => {
+    if(badge){
+      badge.classList.remove('err');
+      badge.innerHTML = authorChip(window.currentUser);
+      badge.classList.add('show');
+      setTimeout(() => badge.classList.remove('show'), 1800);
+    }
+  }).catch((err) => {
+    console.error('Save failed:', err);
+    if(badge){
+      badge.classList.add('show', 'err');
+      badge.textContent = 'Kunne ikke gemme — tjek din forbindelse eller log ind igen';
+    }
+  });
+}
+
+function saveNow(day){
+  const ta = document.querySelector(`.btext[data-day="${day}"]`);
+  if(!ta) return;
+  clearTimeout(saveTimers[day]);
+  doSave(day, ta.value);
+}
+window.saveNow = saveNow;
 
 document.getElementById('bonlyfilled').addEventListener('change', ev => {
   bOnlyFilled = ev.target.checked;
@@ -1061,7 +1086,7 @@ import {
   getStorage, ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1116,11 +1141,16 @@ function updateAuthUI(){
 window.updateAuthUI = updateAuthUI;
 
 window.googleSignIn = function(){
-  signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
+  signInWithRedirect(auth, new GoogleAuthProvider()).catch(err => {
     console.error('Login fejl:', err);
     alert('Login mislykkedes. Prøv igen.');
   });
 };
+
+/* Catch the result when the browser returns from Google's login page */
+getRedirectResult(auth).catch(err => {
+  console.error('Redirect login fejl:', err);
+});
 
 window.googleSignOut = function(){
   signOut(auth);
