@@ -220,6 +220,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 .bpost[data-dest="kana"] .bstripe{background:var(--d5)}
 .bpost[data-dest="tokyo2"] .bstripe{background:var(--d6)}
 .binner{flex:1;padding:18px 20px}
+
+/* Per-user boxes within a day */
+.uboxes{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.ubox{border:1px solid rgba(0,0,0,.08);border-radius:9px;padding:13px 14px;background:var(--paper)}
+.ubox.own{background:var(--white);border-color:rgba(0,0,0,.13);box-shadow:0 1px 0 rgba(0,0,0,.02) inset}
+.ubox-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.ubox-av{width:22px;height:22px;border-radius:50%;background:var(--ink-m);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;flex-shrink:0;overflow:hidden}
+.ubox.own .ubox-av{background:var(--ink)}
+.ubox-av img{width:100%;height:100%;object-fit:cover}
+.ubox-name{font-size:12px;font-weight:500;color:var(--ink)}
+.ubox-name em{font-style:normal;color:var(--ink-m);font-weight:400}
+.ubox-empty{font-size:12px;color:var(--ink-m);font-style:italic;padding:10px 2px}
 .bhead{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap}
 .bday{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--ink-m);letter-spacing:.06em;text-transform:uppercase}
 .btitle{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;letter-spacing:-.1px}
@@ -960,18 +972,58 @@ function initials(name){
   return name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase();
 }
 
-function authorChip(author){
-  if(!author || !author.name) return '';
-  const av = author.photoURL
-    ? `<img src="${author.photoURL}" alt="">`
-    : initials(author.name);
-  return `<span class="bauthor"><span class="bauthor-av">${av}</span>${author.name}</span>`;
+function avatarHtml(author, cls){
+  if(!author) return `<span class="${cls}">?</span>`;
+  return author.photoURL
+    ? `<span class="${cls}"><img src="${author.photoURL}" alt=""></span>`
+    : `<span class="${cls}">${initials(author.name)}</span>`;
+}
+
+/* window.blogData[day] = { [emailKey]: {authorEmail, authorName, authorPhotoURL, text, photos:[{url,path}], updatedAt} } */
+
+function dayHasContent(dayEntries){
+  if(!dayEntries) return false;
+  return Object.values(dayEntries).some(p => (p.text && p.text.trim()) || (p.photos && p.photos.length));
+}
+
+function userBoxHtml(day, post, isOwn){
+  const photosHtml = (post.photos || []).map((p, i) => `
+    <div class="bphoto">
+      <img src="${p.url}" loading="lazy" onclick="openLightbox('${p.url.replace(/'/g,"\\'")}')">
+      ${isOwn ? `<button class="bphoto-del" onclick="deletePhoto(${day}, ${i})" title="Fjern billede">&#215;</button>` : ''}
+    </div>`).join('');
+
+  const addPhotoHtml = isOwn ? `
+    <label class="baddphoto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+      Foto
+      <input type="file" accept="image/*" multiple onchange="addPhotos(${day}, this.files); this.value=''">
+    </label>` : '';
+
+  const author = { name: post.authorName, photoURL: post.authorPhotoURL };
+
+  return `
+    <div class="ubox ${isOwn ? 'own' : ''}">
+      <div class="ubox-head">
+        ${avatarHtml(author, 'ubox-av')}
+        <span class="ubox-name">${post.authorName}${isOwn ? ' <em>(dig)</em>' : ''}</span>
+      </div>
+      <textarea class="btext" placeholder="${isOwn ? 'Skriv om dagen — hvad skete der, hvad smagte I, hvad overraskede jer?' : 'Ingen tekst endnu.'}"
+        data-day="${day}" ${isOwn ? '' : 'readonly'}>${post.text || ''}</textarea>
+      <div class="brow">
+        ${isOwn ? `<button class="bsavebtn" onclick="saveNow(${day})">Gem</button><div class="bsaved" id="bsaved-${day}"></div>` : ''}
+      </div>
+      <div class="bphotos">
+        ${photosHtml}
+        ${addPhotoHtml}
+      </div>
+    </div>`;
 }
 
 function renderBlog(){
   const toolbar = document.getElementById('btoolbar');
   const feed = document.getElementById('bfeed');
-  const canWrite = !!window.currentUser;
+  const me = window.currentUser ? window.currentUser.emailKey : null;
 
   toolbar.style.display = 'flex';
 
@@ -981,31 +1033,36 @@ function renderBlog(){
 
   feed.innerHTML = '';
   let shown = 0;
+  let filledDayCount = 0;
 
   DAYS.forEach(day => {
-    const e = window.blogData[day.day] || {text:'', photos:[]};
-    const filled = (e.text && e.text.trim()) || (e.photos && e.photos.length);
+    const dayEntries = window.blogData[day.day] || {};
+    const filled = dayHasContent(dayEntries);
+    if(filled) filledDayCount++;
     if(bOnlyFilled && !filled) return;
     shown++;
+
+    const others = Object.entries(dayEntries).filter(([k]) => k !== me);
+    const minePost = me ? dayEntries[me] : null;
+
+    let boxesHtml = '';
+    if(window.currentUser){
+      // Always show my own box (empty if I haven't written yet) so I can start contributing
+      boxesHtml += userBoxHtml(day.day, minePost || {
+        authorName: window.currentUser.name, authorPhotoURL: window.currentUser.photoURL, text:'', photos:[]
+      }, true);
+    }
+    others.forEach(([, post]) => {
+      boxesHtml += userBoxHtml(day.day, post, false);
+    });
+
+    if(!window.currentUser && others.length === 0){
+      boxesHtml = `<div class="ubox-empty">Ingen har skrevet noget endnu.</div>`;
+    }
 
     const post = document.createElement('div');
     post.className = 'bpost';
     post.dataset.dest = day.dest;
-
-    const photosHtml = (e.photos || []).map((p, i) => `
-      <div class="bphoto">
-        <img src="${p.url}" loading="lazy" onclick="openLightbox('${p.url.replace(/'/g,"\\'")}')">
-        ${p.author && p.author.name ? `<div class="bphoto-by">${p.author.name}</div>` : ''}
-        ${canWrite ? `<button class="bphoto-del" onclick="deletePhoto(${day.day}, ${i})" title="Fjern billede">&#215;</button>` : ''}
-      </div>`).join('');
-
-    const addPhotoHtml = canWrite ? `
-          <label class="baddphoto">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
-            Foto
-            <input type="file" accept="image/*" multiple onchange="addPhotos(${day.day}, this.files); this.value=''">
-          </label>` : '';
-
     post.innerHTML = `
       <div class="bstripe"></div>
       <div class="binner">
@@ -1014,42 +1071,28 @@ function renderBlog(){
           <span class="btitle">${day.title}</span>
         </div>
         <div class="bdest">${DL[day.dest]} &middot; ${DD[day.dest]}</div>
-        <textarea class="btext" placeholder="${canWrite ? 'Skriv om dagen — hvad skete der, hvad smagte I, hvad overraskede jer?' : 'Ingen tekst endnu.'}"
-          data-day="${day.day}" ${canWrite ? '' : 'readonly'}>${e.text || ''}</textarea>
-        <div class="brow">
-          ${canWrite ? `<button class="bsavebtn" onclick="saveNow(${day.day})">Gem</button>` : ''}
-          <div class="bsaved" id="bsaved-${day.day}">${authorChip(e.textAuthor)}</div>
-        </div>
-        <div class="bphotos">
-          ${photosHtml}
-          ${addPhotoHtml}
-        </div>
+        <div class="uboxes">${boxesHtml}</div>
       </div>`;
 
     feed.appendChild(post);
   });
 
-  if(canWrite){
-    document.querySelectorAll('.btext').forEach(t => {
-      t.addEventListener('input', onTextInput);
-      if(focusedDay && t.dataset.day === focusedDay){
-        t.focus();
-        const len = t.value.length;
-        t.setSelectionRange(len, len);
-      }
-    });
-  }
+  document.querySelectorAll('.ubox.own .btext').forEach(t => {
+    t.addEventListener('input', onTextInput);
+    if(focusedDay && t.dataset.day === focusedDay){
+      t.focus();
+      const len = t.value.length;
+      t.setSelectionRange(len, len);
+    }
+  });
 
-  const filledCount = Object.values(window.blogData).filter(e => (e.text && e.text.trim()) || (e.photos && e.photos.length)).length;
   document.getElementById('bcount').textContent =
-    `${filledCount} af 30 dage udfyldt`;
+    `${filledDayCount} af 30 dage har indlæg`;
 }
 
 let saveTimers = {};
 function onTextInput(ev){
   const day = ev.target.dataset.day;
-  window.blogData[day] = window.blogData[day] || {text:'', photos:[]};
-  window.blogData[day].text = ev.target.value;
   clearTimeout(saveTimers[day]);
   saveTimers[day] = setTimeout(() => doSave(day, ev.target.value), 800);
 }
@@ -1059,7 +1102,7 @@ function doSave(day, text){
   return window.saveText(day, text).then(() => {
     if(badge){
       badge.classList.remove('err');
-      badge.innerHTML = authorChip(window.currentUser);
+      badge.textContent = 'Gemt';
       badge.classList.add('show');
       setTimeout(() => badge.classList.remove('show'), 1800);
     }
@@ -1073,7 +1116,7 @@ function doSave(day, text){
 }
 
 function saveNow(day){
-  const ta = document.querySelector(`.btext[data-day="${day}"]`);
+  const ta = document.querySelector(`.ubox.own .btext[data-day="${day}"]`);
   if(!ta) return;
   clearTimeout(saveTimers[day]);
   doSave(day, ta.value);
@@ -1126,7 +1169,7 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 const auth    = getAuth(app);
-const blogCol = collection(db, "blogEntries");
+const postsCol = collection(db, "blogPosts");
 
 /* Familiens godkendte konti — navnet vises ved tekst og billeder */
 const ALLOWED = {
@@ -1137,10 +1180,12 @@ const ALLOWED = {
   "annette.buhl@gmail.com": "Annette"
 };
 
-window.blogData = {};
+function emailKey(email){ return email.replace(/[^a-zA-Z0-9]/g, '_'); }
+
+window.blogData = {}; // { [day]: { [emailKey]: post } }
 window.currentUser = null;
 
-function dayDocRef(day){ return doc(db, "blogEntries", String(day)); }
+function postDocRef(day, ek){ return doc(db, "blogPosts", `${day}__${ek}`); }
 
 function updateAuthUI(){
   const bar = document.getElementById('bauthbar');
@@ -1195,7 +1240,7 @@ onAuthStateChanged(auth, (user) => {
     updateAuthUI();
     return;
   }
-  window.currentUser = { name: allowedName, email, photoURL: user.photoURL };
+  window.currentUser = { name: allowedName, email, emailKey: emailKey(email), photoURL: user.photoURL };
   updateAuthUI();
   if (document.getElementById('bv').style.display === 'block' && typeof renderBlog === 'function') renderBlog();
 });
@@ -1204,8 +1249,16 @@ onAuthStateChanged(auth, (user) => {
    renderBlog() itself skips resetting a textarea the person is
    actively typing in, so live updates from other devices don't
    interrupt anyone's writing. */
-onSnapshot(blogCol, (snap) => {
-  snap.forEach(d => { window.blogData[d.id] = d.data(); });
+onSnapshot(postsCol, (snap) => {
+  const fresh = {};
+  snap.forEach(d => {
+    const data = d.data();
+    const day = data.day;
+    const ek = data.authorKey;
+    if(!fresh[day]) fresh[day] = {};
+    fresh[day][ek] = data;
+  });
+  window.blogData = fresh;
   const bv = document.getElementById('bv');
   if (bv && bv.style.display === 'block' && typeof renderBlog === 'function') {
     renderBlog();
@@ -1216,41 +1269,55 @@ onSnapshot(blogCol, (snap) => {
 
 window.saveText = function(day, text){
   if(!window.currentUser) return Promise.reject('not signed in');
-  return setDoc(dayDocRef(day), {
+  const u = window.currentUser;
+  const existingPhotos = (window.blogData[day] && window.blogData[day][u.emailKey] && window.blogData[day][u.emailKey].photos) || [];
+  return setDoc(postDocRef(day, u.emailKey), {
+    day: Number(day),
+    authorKey: u.emailKey,
+    authorEmail: u.email,
+    authorName: u.name,
+    authorPhotoURL: u.photoURL || null,
     text,
-    textAuthor: { name: window.currentUser.name, email: window.currentUser.email, photoURL: window.currentUser.photoURL || null }
-  }, { merge: true });
+    photos: existingPhotos,
+    updatedAt: Date.now()
+  });
 };
 
 window.addPhotos = async function(day, files){
   if(!window.currentUser){ alert('Log ind for at tilføje billeder.'); return; }
   if(!files || !files.length) return;
-  const author = { name: window.currentUser.name, email: window.currentUser.email, photoURL: window.currentUser.photoURL || null };
+  const u = window.currentUser;
+  const existing = (window.blogData[day] && window.blogData[day][u.emailKey]) || {
+    day: Number(day), authorKey: u.emailKey, authorEmail: u.email, authorName: u.name, authorPhotoURL: u.photoURL || null, text:'', photos:[]
+  };
+  let photos = existing.photos || [];
   for (const file of Array.from(files)) {
     try {
-      const path = `photos/day_${day}/${Date.now()}_${file.name}`;
+      const path = `photos/day_${day}/${u.emailKey}/${Date.now()}_${file.name}`;
       const sref = ref(storage, path);
       await uploadBytes(sref, file);
       const url = await getDownloadURL(sref);
-      const current = (window.blogData[day] && window.blogData[day].photos) || [];
-      const updated = [...current, { url, path, author }];
-      window.blogData[day] = { ...(window.blogData[day] || {}), photos: updated };
-      await setDoc(dayDocRef(day), { photos: updated }, { merge: true });
+      photos = [...photos, { url, path }];
     } catch(e) {
       console.error('Photo upload failed:', e);
       alert('Kunne ikke uploade billedet. Tjek din internetforbindelse og prøv igen.');
     }
   }
+  window.blogData[day] = window.blogData[day] || {};
+  window.blogData[day][u.emailKey] = { ...existing, photos, updatedAt: Date.now() };
+  await setDoc(postDocRef(day, u.emailKey), window.blogData[day][u.emailKey]);
   if (typeof renderBlog === 'function') renderBlog();
 };
 
 window.deletePhoto = async function(day, idx){
   if(!window.currentUser){ alert('Log ind for at fjerne billeder.'); return; }
-  const current = (window.blogData[day] && window.blogData[day].photos) || [];
-  const target  = current[idx];
-  const updated = current.filter((_, i) => i !== idx);
-  window.blogData[day] = { ...(window.blogData[day] || {}), photos: updated };
-  await setDoc(dayDocRef(day), { photos: updated }, { merge: true });
+  const u = window.currentUser;
+  const existing = window.blogData[day] && window.blogData[day][u.emailKey];
+  if(!existing) return;
+  const target  = (existing.photos || [])[idx];
+  const updated = (existing.photos || []).filter((_, i) => i !== idx);
+  window.blogData[day][u.emailKey] = { ...existing, photos: updated, updatedAt: Date.now() };
+  await setDoc(postDocRef(day, u.emailKey), window.blogData[day][u.emailKey]);
   if (target && target.path) {
     try { await deleteObject(ref(storage, target.path)); } catch(e) { /* ignore */ }
   }
