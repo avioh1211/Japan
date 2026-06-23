@@ -326,7 +326,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
   <div class="hero-dots"></div>
   <div class="hero-k">日本</div>
   <p class="hero-eye">Sommer — Japan 2025</p>
-  <h1 class="hero-title">30 Dage i <em>Land of<br>the Rising Sun</em></h1>
+  <h1 class="hero-title">30 Dage i <em>Solens Rige</em></h1>
   <p class="hero-sub">Tokyo · Osaka · Hiroshima · Naoshima · Nagoya · Kanazawa</p>
   <div class="hero-stats">
     <div class="hs"><span class="hs-n">30</span><span class="hs-l">Dage</span></div>
@@ -377,7 +377,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 </nav>
 
 <!-- ── CAT BAR ───────────────────────────────────────────── -->
-<div class="cbar">
+<div class="cbar" id="cbar">
   <span class="cbar-lbl">Kategori:</span>
   <button class="cpill active" data-cat="all">Alle</button>
   <button class="cpill" data-cat="culture"><span class="cdot ac"></span>Kultur</button>
@@ -926,6 +926,7 @@ function setView(v){
   document.getElementById('bv').style.display   = v === 'blog' ? 'block' : 'none';
   document.getElementById('bleg').style.display = v === 'tl'   ? 'flex'  : 'none';
   document.getElementById('dtabs').style.display = v === 'blog' ? 'none' : 'flex';
+  document.getElementById('cbar').style.display = v === 'blog' ? 'none' : 'flex';
   document.getElementById('btn-tl').classList.toggle('active',  v === 'tl');
   document.getElementById('btn-map').classList.toggle('active', v === 'map');
   document.getElementById('btn-blog').classList.toggle('active', v === 'blog');
